@@ -1,0 +1,19 @@
+spring:
+  profiles:
+    active: local
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: local
+  cloud:
+    gcp:
+      pubsub:
+        enabled: false
+      core:
+        enabled: false
+      project-id: local-project
+      credentials:
+        location: classpath:/dummy.json
