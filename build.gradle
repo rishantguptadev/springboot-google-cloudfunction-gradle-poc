@@ -1,0 +1,85 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.1'
+    id 'io.spring.dependency-management' version '1.1.5'
+}
+
+group = 'com.demo'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    springCloudVersion = "2023.0.3"   // Required for spring-cloud-function
+    springCloudGcpVersion = "5.0.2"  // Required for spring-cloud-gcp
+}
+
+dependencies {
+    // Spring Core
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    // Spring Web if you need Actuator or web test
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Spring Cloud Function
+    implementation 'org.springframework.cloud:spring-cloud-function-context'
+    implementation 'org.springframework.cloud:spring-cloud-starter-function-web'
+
+    // GCP Pub/Sub Support
+    implementation 'com.google.cloud:spring-cloud-gcp-starter-pubsub'
+
+    // Google Cloud Function API
+    implementation 'com.google.cloud.functions:functions-framework-api:1.1.0'
+
+    //Invoker dependency for local development
+    runtimeOnly 'com.google.cloud.functions.invoker:java-function-invoker:1.3.1'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+}
+
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "com.google.cloud:spring-cloud-gcp-dependencies:${springCloudGcpVersion}"
+    }
+}
+
+dependencyManagement {
+    imports {
+    }
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+    archiveClassifier = ''
+}
+
+tasks.register('packageForDeployment', Zip) {
+    group = 'build'
+    description = 'Package utility jar and dependencies'
+    from(jar) { into('lib') }
+    from(configurations.runtimeClasspath) { into('lib') }
+    archiveFileName = "cloudfunction-utility.zip"
+    destinationDirectory = file("$buildDir/distributions")
+}
+
+tasks.register('runFunction', JavaExec) {
+    mainClass = 'com.google.cloud.functions.invoker.runner.Invoker'
+    classpath = sourceSets.main.runtimeClasspath
+    args = [
+            '--target', 'com.demo.utility.GcpFunctionHandler',
+            '--port', '8080'
+    ]
+}
+
+
