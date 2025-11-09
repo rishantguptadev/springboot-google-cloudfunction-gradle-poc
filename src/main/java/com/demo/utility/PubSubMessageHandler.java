@@ -2,19 +2,21 @@ package com.demo.utility;
 
 import com.google.cloud.functions.BackgroundFunction;
 import com.google.cloud.functions.Context;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PubSubMessageHandler implements BackgroundFunction<PubSubMessage> {
 
-    private final UtilityService utilityService;
+    private static final AnnotationConfigApplicationContext context =
+            new AnnotationConfigApplicationContext(Application.class);
 
-    public PubSubMessageHandler(UtilityService utilityService) {
-        this.utilityService = utilityService;
-    }
-
+    private UtilityService service;
+    
     @Override
-    public void accept(PubSubMessage message, Context context) {
-        utilityService.process(message);
+    public void accept(PubSubMessage message, Context contextInfo) {
+        service = context.getBean(UtilityService.class);
+        service.process(message);
     }
 }
