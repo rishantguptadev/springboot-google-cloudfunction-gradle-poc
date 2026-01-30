@@ -22,3 +22,8 @@
         "subscription": "projects/test/subscriptions/local-sub"
       }'
 ```
+
+![Start Google Cloud Function in remote debugger enabled](./Screenshot2.png)
+![Start remote debugger](./Screenshot1.png)
+![Publish message](./Screenshot3.png)
+![Debugger Point](./Screenshot4.png)
